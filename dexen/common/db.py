@@ -37,7 +37,8 @@ import logging
 import time
 
 import bson
-from flask.ext import login
+#from flask.ext import login
+import flask_login as login
 import gridfs
 import pymongo
 from pymongo import collection as coll
@@ -341,7 +342,7 @@ class FileManager(object):
         col = self.user_db[job_name + ".files"]
         fields = {"filename":True, "_id": False, "length":True, "uploadDate":True}
         res = {}
-        for elem in col.find(fields=fields):
+        for elem in col.find(projection=fields):
             LOGGER.debug("files metadata: %s", elem)
             file_name = elem["filename"]
             upload_time = unix_time(elem["uploadDate"])
@@ -542,7 +543,7 @@ class JobDataManager(object):
                 "$exists": True
             }
         }
-        return [DataObjectId(data["_id"]) for data in self.coll.find(spec, fields=["_id"])]
+        return [DataObjectId(data["_id"]) for data in self.coll.find(spec, projection=["_id"])]
 
     def remove_execution_ids(self, data_ids, execution_id):
         """
@@ -584,7 +585,8 @@ class JobDataManager(object):
         for key in condition:
             spec[key] = condition[key]
         result = []
-        for data in self.coll.find(spec, fields=["_id", ATTRS_BEING_MODIFIED]):
+        for data in self.coll.find(spec, projection=["_id", ATTRS_BEING_MODIFIED]):
+            print data
             data["_id"] = DataObjectId(data["_id"])
             condition_attrs_set = self._extract_all_attrs(condition)
             modified_set = set()
@@ -599,7 +601,7 @@ class JobDataManager(object):
         """
         field = self._attrs_being_modified_field(execution_id)
         result = self.coll.find_one(
-            {"_id": data_id.get_value(), field: {"$exists": 1}}, fields=[field])
+            {"_id": data_id.get_value(), field: {"$exists": 1}}, projection=[field])
         if result:
             return result[ATTRS_BEING_MODIFIED][execution_id]
         return []
@@ -610,7 +612,7 @@ class JobDataManager(object):
         self.logger.debug("Getting inc doc")
         field = rollback_inc_field(execution_id)
         result = self.coll.find_one({"_id": data_id.get_value(),
-                                     field: {"$exists": 1}}, fields=[field])
+                                     field: {"$exists": 1}}, projection=[field])
         self.logger.debug("Inc doc: %s", result)
         return result
 
@@ -637,7 +639,7 @@ class JobDataManager(object):
             field = rollback_doc_field(execution_id)
             res = self.coll.find_one({
                 "_id": modified_id.get_value(), field: {"$exists": 1}
-            }, fields=[field])
+            }, projection=[field])
             rollback_doc = self._get_dict_value(res, field) if res else {}
             self.logger.info("Rollback doc from db: %s", rollback_doc)
             self.logger.info("Processing rollback doc to prepare update doc...")
@@ -657,15 +659,15 @@ class JobDataManager(object):
 
     def get_all_data(self):
         result = []
-        for data in self.coll.find({}, fields={ATTRS_BEING_MODIFIED : False, FIELD_ROLLBACK : False}):
+        for data in self.coll.find({}, projection={ATTRS_BEING_MODIFIED : False, FIELD_ROLLBACK : False}):
             result.append(data)
         return result
 
     def get_data_value(self, data_id, attr_name):
-        res = self.coll.find_one(data_id, fields=[attr_name])
+        res = self.coll.find_one(data_id, projection=[attr_name])
         if not res is None:
             return res.get(attr_name)
         return None
 
     def get_data(self, data_id):
-        return self.coll.find_one(data_id, fields={ATTRS_BEING_MODIFIED : False, FIELD_ROLLBACK : False})
+        return self.coll.find_one(data_id, projection={ATTRS_BEING_MODIFIED : False, FIELD_ROLLBACK : False})

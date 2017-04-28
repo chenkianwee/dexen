@@ -185,8 +185,14 @@ def DataObject(key=None, useRunningId=True): #NOT USED
         The assumption here is that when the user code runs, the os environment
         is already set by the dexen system run time.
     """
-    db_client = pymongo.MongoClient(host=os.environ[con.ENV_DB_IP],
-                                    port=int(os.environ[con.ENV_DB_PORT]))
+    #db_client = pymongo.MongoClient(host=os.environ[con.ENV_DB_IP],
+    #                                port=int(os.environ[con.ENV_DB_PORT]))
+    ip_string = os.environ[con.ENV_DB_IP]
+    host_index = ip_string.find("host=[")
+    ip_start_index = host_index + 7
+    ip_end_index = ip_string.find("'",ip_start_index )
+    host_str = ip_string[ip_start_index:ip_end_index]
+    db_client = pymongo.MongoClient(host=host_str)
     user_name = os.environ[con.ENV_USER_NAME]
     job_name = os.environ[con.ENV_JOB_NAME]
     execution_id = os.environ[con.ENV_EXECUTION_ID]
@@ -238,11 +244,11 @@ class _DataObject(object):
         return "{0}.{1}".format(con.FIELD_ROLLBACK, self._execution_id)
 
     def get_value(self, attr_name):
-        doc = self.coll.find_one(self._id, fields=[attr_name])
+        doc = self.coll.find_one(self._id, projection=[attr_name])
         return doc.get(attr_name, None)
 
     def set_value(self, attr_name, value):
-        res = self.coll.find_one({"_id": self._id}, fields=[attr_name])
+        res = self.coll.find_one({"_id": self._id}, projection=[attr_name])
         old_value = res.get(attr_name, con.NON_EXISTENT_VALUE)
 
         spec = {

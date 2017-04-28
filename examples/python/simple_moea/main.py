@@ -25,9 +25,9 @@ from time import gmtime, strftime
 
 from dexen_libs.api import server_api, data_api
 import settings as ss
-
-USERNAME = "user"
-PASSWORD = "pswd"
+import os 
+USERNAME = "kianwee"
+PASSWORD = "pydexuro"
 
 DEBUG = True
 

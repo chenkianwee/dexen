@@ -1,0 +1,1 @@
+Database(MongoClient(host=['10.25.178.132:27017'], document_class=dict, tz_aware=False, connect=True), u'host')

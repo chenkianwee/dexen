@@ -56,7 +56,7 @@ from dexen_libs.feedback.selection import (
 #GENERAL
 VERBOSE = False
 POP_SIZE = 100
-MAX_BIRTHS = 10000 #not used at the moment
+MAX_BIRTHS = 500 #not used at the moment
 
 #STRING CONSTANTS
 INITIALIZE = "initialize"

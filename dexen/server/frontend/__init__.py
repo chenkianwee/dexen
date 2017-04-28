@@ -22,7 +22,7 @@
 import os
 
 from flask import Flask
-from flask.ext.login import LoginManager
+from flask_login import LoginManager
 from werkzeug.wsgi import SharedDataMiddleware
 
 

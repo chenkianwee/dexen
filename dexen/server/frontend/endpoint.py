@@ -23,7 +23,7 @@ import os
 import logging
 
 from flask import request, redirect, url_for, flash, send_file
-from flask.ext.login import (login_user, logout_user, login_required,
+from flask_login import (login_user, logout_user, login_required,
                              current_user)
 from flask.helpers import make_response
 from flask.json import jsonify
@@ -54,10 +54,9 @@ _db_client = None
 def load_user(user_id):
     return _user_mgr.get_user(id=user_id)
 
-
 @app.route("/")
 def index():
-    if not current_user.is_authenticated():
+    if not current_user.is_authenticated:
         logger.debug("Current user is not authenticated redirecting to login page")
         return redirect(url_for("login"))
     logger.debug("Current user is authenticated: %s", current_user.username) # @UndefinedVariable
@@ -98,7 +97,7 @@ def login():
 def logout():
     logger.debug("I am logging out user: %s", current_user.username)  # @UndefinedVariable
     logout_user()
-    assert current_user.is_authenticated() == False
+    assert current_user.is_authenticated == False
     logger.debug("I am redirecting to login page again")
     return redirect(url_for("index"))
 

@@ -20,7 +20,7 @@
 # ==================================================================================================
 
 
-from flask.ext.wtf.form import Form
+from flask_wtf.form import Form
 from wtforms.fields import TextField, PasswordField
 from wtforms import validators
 
